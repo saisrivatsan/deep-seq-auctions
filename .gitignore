@@ -1,6 +1,6 @@
 # Misc
 slurm/
-*.shy
+*.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

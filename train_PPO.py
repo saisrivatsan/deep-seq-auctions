@@ -144,7 +144,7 @@ class ActorCriticNetworkEntryFee(ActorCriticPolicy):
         :return: Action distribution
         """
         sigmoid_offset = 0.5
-        softplus_offset = 2.0
+        softplus_offset = 1.0
         
         mean_actions = self.action_net(latent_pi)
         posted_price = F.sigmoid(mean_actions[..., :-1] - sigmoid_offset)

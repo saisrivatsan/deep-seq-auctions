@@ -81,10 +81,10 @@ class Args:
     num_samples_for_pi: int = 256
     """ Number of samples to estimate gradient in policy improvement step """
     
-    log_std_decay: float = 0.5
+    log_std_decay: float = 0.25
     """ How much to decay log_std after every iteration """
     
-    max_iteration: int = 10
+    max_iteration: int = 20
     """ Max iteration """
 
     
@@ -159,14 +159,12 @@ if __name__ == "__main__":
 
     elif args.env_type == "unif":
         v_dist = UNIFScale(args.num_items, demand = None)
-
-        args.td_epochs = 200
-        args.vf_epochs = 200
         args.pi_epochs = 50
 
         env_class = entryfee.AuctionEnv
         policy_class = ActorCriticNetworkEntryFee
         model_class = FPIScale
+        
 
     else:
         print("Auction Env not supported")

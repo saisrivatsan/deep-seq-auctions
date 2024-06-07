@@ -39,7 +39,7 @@ class CustomFeatureExtractor(nn.Module):
 
 """ Offset Softplus """
 class SoftplusOffset(nn.Module):
-    def __init__(self, offset = 2.0):
+    def __init__(self, offset = 1.0):
         super().__init__()
         self.offset = offset
 
@@ -48,7 +48,7 @@ class SoftplusOffset(nn.Module):
     
 
 class SoftplusAndSigmoid(nn.Module):
-    def __init__(self, offset_softplus = 2.0, offset_sigmoid = 0.5):
+    def __init__(self, offset_softplus = 1.0, offset_sigmoid = 0.5):
         super().__init__()
         self.offset_sigmoid = offset_sigmoid
         self.offset_softplus = offset_softplus

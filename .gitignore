@@ -2,8 +2,7 @@
 slurm/
 *.sh
 *.ipynb
-experiments/*
-!experiments/.gitkeep
+experiments/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

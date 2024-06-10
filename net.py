@@ -131,3 +131,5 @@ class ActorCriticNetworkEntryFee(ActorCriticNetworkBundle):
         
         self.actor_logstd = nn.Parameter(torch.zeros(1, np.prod(envs.single_action_space.shape)))
         self.actor_logstd.data += log_std_init
+        
+   

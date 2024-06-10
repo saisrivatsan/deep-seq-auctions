@@ -250,7 +250,7 @@ class FPIScale(FPI):
         self.init_optimizers(self.args.lr_vf, self.args.lr_pi)
         self.collect_rollouts()
         
-        self.TD(self.args.vf_epochs)
+        #self.TD(self.args.vf_epochs)
         self.fit_value(self.args.vf_epochs)
         self.fit_policy(self.args.pi_epochs)
         

@@ -74,10 +74,7 @@ class Args:
     
     device: str = "cuda"
     """ CUDA or CPU """
-    
-    t_max: int = 8 * 60 * 60
-    """ Max time to train: 8 hrs """
-    
+        
     max_iteration: int = 20000
     """ Max iteration """
     
@@ -267,14 +264,11 @@ if __name__ == "__main__":
         
         if iteration % args.print_iter == 0:
             t = time.time() - tic
-            rev_eval = evaluate_policy(model, eval_env, n_eval_episodes=10000)[0]
+            rev_eval = evaluate_policy(model, eval_env, n_eval_episodes=10240)[0]
             logger.info("[Iter]: %d, [Time Elapsed]: %.4f, [Rev]: %.6f"%(iteration, t, rev_eval))
             
-        if t > args.t_max: 
-            break
-            
     t = time.time() - tic
-    rev_eval = evaluate_policy(model, eval_env, n_eval_episodes=10000)[0]
+    rev_eval = evaluate_policy(model, eval_env, n_eval_episodes=10240)[0]
     logger.info("[Iter]: %d, [Time Elapsed]: %.4f, [Rev]: %.6f"%(iteration, t, rev_eval))
 
             

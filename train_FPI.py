@@ -92,13 +92,7 @@ class Args:
     
     device: str = "cuda"
     """ CUDA or CPU """
-    
-    t_max: int = 8 * 60 * 60
-    """ Max time to train: 8 hrs """
-    
-    print_iter: int = 100
-    """ When to log stats """
-    
+            
     seed: int = 24
     """seed of the experiment"""
 

@@ -61,15 +61,15 @@ class Args:
     
     
 class RochetNetOffsets(nn.Module):      
-    def __init__(self, allocs, offsets, tau = 100, scale = 1.0):
+    def __init__(self, allocs, offsets, tau = 100, scale = [1.0]):
         super().__init__()
         self.num_menus, self.num_items = allocs.shape
         self.register_buffer("allocs", torch.Tensor(allocs))
         self.register_buffer("offsets", torch.Tensor(offsets))
+        self.register_buffer("scale", torch.Tensor(scale))
         
         self.pay = nn.Parameter(torch.Tensor(self.num_menus))
         
-        self.scale = scale
         self.tau = tau
         self.reset_parameters()
         self.null_idx = np.where(allocs.sum(-1) == 0)[0][0]
@@ -233,13 +233,15 @@ if __name__ == "__main__":
                 if demand is not None:
                     allocs = allocs[allocs.sum(-1) <= demand]
                     offsets = offsets[-demand-1:]
+                    
+                scale = allocs.sum(-1)
 
                 rochetnet_kwargs = dict(lr = args.learning_rate, 
                                         max_iter = args.max_iter, 
                                         batch_size = args.batch_size,
                                         num_val_batches = args.num_val_batches,
                                         tau = args.tau, 
-                                        scale = 1.0,
+                                        scale = scale,
                                         device = args.device)
 
                 action_all[idx][item], offset_new[item] = train_rochetnet(allocs, offsets, sampler, **rochetnet_kwargs)

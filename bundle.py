@@ -54,3 +54,43 @@ class AuctionEnv(Env):
         self.state = np.ones(self.num_items + 1, dtype = np.float32)
         self.state[-1] = 0.0
         return self.state, {}
+    
+    
+class SymUnifAuctionEnv(Env):
+    def __init__(self, num_agents, num_items):
+        """ Initialize environment """
+        self.num_agents = num_agents
+        self.num_items = num_items
+        self.num_menus = num_items + 1
+        self.action_space = Box(low = 0.0, high = self.num_items, shape=(self.num_menus,), dtype=np.float32)
+        self.observation_space = Box(low = 0.0,  high = 1.0,  shape=(self.num_items + 1,), dtype=np.float32)
+        self.reset()
+
+    def step(self, action):
+        """ Sample valuation """
+        V = np.random.rand(self.num_items)
+        V[self.state[:-1] < 1] = -1000
+        sort_idx = np.argsort(V)[::-1]
+
+        V = np.insert(np.cumsum(V[sort_idx]), 0, 0)
+        utility = V[:len(action)] - action
+
+        sel_idx = np.argmax(utility)
+        reward = action[sel_idx]
+
+        allocs = np.zeros(self.num_items)
+        allocs[sort_idx[:sel_idx]] = 1.0
+        self.state[:self.num_items] = self.state[:self.num_items] - allocs
+        self.state[-1] += 1.0
+
+        """ Check if done """
+        terminated = (int(self.state[-1]) == self.num_agents)
+
+        return self.state, reward, terminated, False, {}
+
+    def reset(self, seed = None, options = None):
+        """ Reset environment to original state """
+        super().reset(seed=seed) 
+        self.state = np.ones(self.num_items + 1, dtype = np.float32)
+        self.state[-1] = 0.0
+        return self.state, {}

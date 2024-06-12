@@ -37,7 +37,7 @@ Menu Structure  | Filename | Notes
 Combinatorial | bundle.py | Used when num_items <= 10
 Entry Fee | entryfee.py | Used when num_items > 10
 
-To run DP or FPI, do
+To run PPO, do
 ```
 python <train_filename> -n <num_agents> -m <num_items> -e <setting_name> -l <learning_rate>
 ```
@@ -45,6 +45,8 @@ To run DP or FPI, do
 ```
 python <train_filename> -n <num_agents> -m <num_items> -e <setting_name>
 ```
+
+The logfiles can be found in ```experiments/``` folder
 
 ## Citing the Project
 

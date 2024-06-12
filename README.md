@@ -46,6 +46,7 @@ To run DP or FPI, do
 python <train_filename> -n <num_agents> -m <num_items> -e <setting_name>
 ```
 
+To change other hyperparameters, visit the corresponding file and modify the ```Args``` class.  
 The logfiles can be found in ```experiments/``` folder
 
 ## Citing the Project

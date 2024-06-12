@@ -55,12 +55,13 @@ class Args:
     
     """ Optimization Params ---------------------- """
     
-    lr_vf: float = 1e-3
+    lr_vf: float = 1e-4
     lr_pi: float = 1e-4
     """Learning Rate for value fitting and policy improvement"""
-    
-    vf_epochs: int = 200
-    pi_epochs: int = 200
+        
+    vf_epochs: int = 500
+    td_epochs = 100
+    pi_epochs: int = 50
     """ Epochs for value fitting and policy improvement """
     
     batch_size: int = 256
@@ -142,6 +143,7 @@ if __name__ == "__main__":
 
         elif args.env_type == "comb2":
             v_dist = COMB2(args.num_items, demand = None)
+            args.pi_epochs = 200
 
         else:
             print("Auction Env not supported")
@@ -153,12 +155,9 @@ if __name__ == "__main__":
 
     elif args.env_type == "unif":
         v_dist = UNIFScale(args.num_items, demand = None)
-        args.pi_epochs = 50
-
         env_class = entryfee.AuctionEnv
         policy_class = ActorCriticNetworkEntryFee
         model_class = FPIScale
-        
 
     else:
         print("Auction Env not supported")

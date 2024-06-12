@@ -66,8 +66,50 @@ class FPI:
 
             self.opt_vf.step()
 
-    def TD(self):
-        raise NotImplementedError
+    def TD(self, td_epochs):
+                
+        self.fit_value(td_epochs)
+        
+        
+        batch_size = self.args.batch_size
+        num_items = self.args.num_items
+        num_agents = self.args.num_agents
+        n_samples = self.args.num_samples_for_pi
+        
+        alloc = self.v_dist.allocs_tensor
+        num_menus = self.v_dist.num_menus
+        next_states = torch.zeros((batch_size, num_menus, num_items + 1), device = self.device)
+        
+        scalers = torch.Tensor(self.v_dist.action_scale).to(device = self.device)
+        
+        
+
+
+        for mb_obs, _, _, _, _, _, inds in self.rollout_buffer.get(batch_size = batch_size, return_inds = True):
+
+            with torch.no_grad():
+                
+                """ Preprocess action """
+                pay = self.agent.get_action(mb_obs) * scalers
+                mask = (1 - mb_obs[:, :num_items]) @ alloc.T
+                mask = (mask > 0).type(torch.float)
+                pay = ((1 - mask) * pay + mask * 100)
+                pay[:, 0] = 0
+
+                """ Compute Next State and Offset """
+                next_states[..., :num_items] = mb_obs[:, None, :num_items] - alloc[None, :, :]
+                next_states[..., -1] = mb_obs[:, None, -1] + 1.0
+                next_state_mask = ((next_states < 0).sum(dim = -1) <= 0) * (next_states[..., -1] < num_agents)
+                with torch.no_grad():
+                    offset = self.agent.get_value(next_states.view(-1, num_items + 1)).flatten()
+                    offset = offset.view(batch_size, num_menus)
+                    offset = offset * next_state_mask.type(torch.float)
+
+                V_SAMPLES = self.v_dist.sample_tensor(n_samples)
+                utilities = V_SAMPLES - pay[:, None, :]
+               
+                sel_idx = torch.argmax(utilities, dim = -1)
+                self.rollout_buffer.returns[inds] = (pay + offset)[torch.arange(batch_size).unsqueeze(1), sel_idx].mean(-1)
 
     """ Policy Improvement Step """
     def fit_policy(self, pi_epochs):
@@ -124,6 +166,7 @@ class FPI:
     def learn(self):
         self.init_optimizers(self.args.lr_vf, self.args.lr_pi)
         self.collect_rollouts()
+        self.TD(self.args.td_epochs)
         self.fit_value(self.args.vf_epochs)
         self.fit_policy(self.args.pi_epochs)
         self.agent.actor_logstd.data -= self.args.log_std_decay
@@ -153,7 +196,8 @@ class FPIScale(FPI):
                 mask = (mb_obs[:, :num_items] < 1)
                 posted_prices[mask] = 1000
 
-                v_samples = torch.rand(n_samples, num_items, device = self.device)
+                v_samples = self.v_dist.sample_tensor(n_samples)
+                
                 welfare = v_samples[None, :, :] - posted_prices[:, None, :]
                 sort_idx = torch.argsort(-welfare, dim = -1)
                 utility = torch.cumsum(torch.gather(welfare, -1, sort_idx), dim = -1) - entry_fee[:, None, None]
@@ -183,10 +227,6 @@ class FPIScale(FPI):
 
                 self.rollout_buffer.returns[inds] = (reward + offset).mean(-1)
                 
-        
-                
-                
-
 
     """ Policy Improvement Step """
     def fit_policy(self, pi_epochs):
@@ -245,13 +285,3 @@ class FPIScale(FPI):
                 revenue_loss.backward()
 
             self.opt_pi.step()
-            
-    def learn(self):
-        self.init_optimizers(self.args.lr_vf, self.args.lr_pi)
-        self.collect_rollouts()
-        
-        #self.TD(self.args.vf_epochs)
-        self.fit_value(self.args.vf_epochs)
-        self.fit_policy(self.args.pi_epochs)
-        
-        self.agent.actor_logstd.data -= self.args.log_std_decay

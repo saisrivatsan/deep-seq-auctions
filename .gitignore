@@ -2,7 +2,6 @@
 slurm/
 *.sh
 *.ipynb
-experiments/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

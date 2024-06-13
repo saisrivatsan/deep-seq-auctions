@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
         elif args.env_type == "comb2":
             v_dist = COMB2(args.num_items, demand = None)
-            args.pi_epochs = 200
+            args.lr_pi = 1e-3
 
         else:
             print("Auction Env not supported")
